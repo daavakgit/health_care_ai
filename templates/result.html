@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Health Report — MediPredict AI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body class="result-page">
+
+  <!-- ── NAV ─────────────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <span class="logo-icon">⬡</span>
+        <span>MediPredict<em>AI</em></span>
+      </a>
+      <div class="nav-links">
+        <a href="/form" class="btn-nav">New Assessment</a>
+      </div>
+    </div>
+  </nav>
+
+  {% if error %}
+  <!-- No prediction data -->
+  <main class="result-main" style="display:flex;align-items:center;justify-content:center;min-height:70vh;">
+    <div style="text-align:center;">
+      <p style="font-size:4rem;margin-bottom:1rem;">🔬</p>
+      <h2>No report found</h2>
+      <p style="color:var(--muted);margin-bottom:2rem;">Please complete the patient assessment form first.</p>
+      <a href="/form" class="btn-primary">Start Assessment</a>
+    </div>
+  </main>
+
+  {% else %}
+  <!-- ── MAIN REPORT ─────────────────────────────────────────────── -->
+  <main class="result-main">
+
+    <!-- ── REPORT HEADER ── -->
+    <div class="report-header">
+      <div class="report-meta">
+        <span>📅 {{ prediction.timestamp }}</span>
+        <span>👤 {{ prediction.patient.name }}, {{ prediction.patient.age }} yrs · {{ prediction.patient.gender }}</span>
+      </div>
+      <h1>Health Risk Report</h1>
+    </div>
+
+    <!-- ── DOCTOR ALERT (only if High overall) ── -->
+    {% if prediction.doctor_alert %}
+    <div class="doctor-alert">
+      <div class="alert-icon">🚨</div>
+      <div class="alert-content">
+        <strong>Consult a Doctor Immediately</strong>
+        <p>Your assessment indicates HIGH risk in one or more disease categories. Please schedule an appointment with a healthcare professional as soon as possible. Do not delay.</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ── OVERALL RISK BANNER ── -->
+    <div class="overall-risk risk-{{ prediction.overall_risk | lower }}">
+      <div class="overall-inner">
+        <div class="overall-label">Overall Risk Level</div>
+        <div class="overall-value">{{ prediction.overall_risk }}</div>
+        <div class="overall-sub">
+          {% if prediction.overall_risk == 'Low' %}
+            Your health markers are generally within safe ranges. Keep up the good work!
+          {% elif prediction.overall_risk == 'Medium' %}
+            Some markers need attention. Review recommendations below.
+          {% else %}
+            Significant risk detected. Please act on the recommendations below.
+          {% endif %}
+        </div>
+      </div>
+      <div class="overall-icon">
+        {% if prediction.overall_risk == 'Low' %}✅
+        {% elif prediction.overall_risk == 'Medium' %}⚠️
+        {% else %}🔴{% endif %}
+      </div>
+    </div>
+
+    <!-- ── VITALS SUMMARY ── -->
+    <section class="report-section">
+      <h2 class="section-heading">Your Health Metrics</h2>
+      <div class="vitals-grid">
+        {% for label, value in prediction.vitals.items() %}
+        <div class="vital-card">
+          <span class="vital-label">{{ label }}</span>
+          <span class="vital-value">{{ value }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- ── DISEASE-BY-DISEASE RESULTS ── -->
+    <section class="report-section">
+      <h2 class="section-heading">Disease Risk Breakdown</h2>
+
+      {% set disease_icons = {'diabetes': '🩸', 'heart': '🫀', 'kidney': '🫘'} %}
+      {% set disease_labels = {'diabetes': 'Diabetes', 'heart': 'Heart Disease', 'kidney': 'Kidney Disease'} %}
+
+      {% for disease, result in prediction.predictions.items() %}
+      <div class="disease-result risk-border-{{ result.risk_level | lower }}">
+
+        <!-- Disease header -->
+        <div class="dr-header">
+          <div class="dr-title">
+            <span class="dr-icon">{{ disease_icons[disease] }}</span>
+            <div>
+              <h3>{{ disease_labels[disease] }}</h3>
+              <span class="risk-badge risk-{{ result.risk_level | lower }}">{{ result.risk_level }} Risk</span>
+            </div>
+          </div>
+          <div class="dr-proba">
+            {% for level, pct in result.probabilities.items() %}
+            <div class="proba-row">
+              <span class="proba-label">{{ level }}</span>
+              <div class="proba-bar-wrap">
+                <div class="proba-bar risk-bar-{{ level | lower }}" style="width:{{ pct }}%"></div>
+              </div>
+              <span class="proba-pct">{{ pct }}%</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Explainability: top influencing factors -->
+        <div class="dr-factors">
+          <h4>🧠 Key Influencing Factors</h4>
+          <div class="factors-list">
+            {% for factor in result.top_factors %}
+            <div class="factor-row">
+              <span class="factor-name">{{ factor.feature }}</span>
+              <div class="factor-bar-wrap">
+                <div class="factor-bar" style="width:{{ [factor.importance * 4, 100] | min }}%"></div>
+              </div>
+              <span class="factor-pct">{{ factor.importance }}%</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="dr-recs">
+          <h4>💡 Recommendations</h4>
+          <ul class="recs-list">
+            {% for rec in result.recommendations %}
+            <li class="{% if '⚠️' in rec %}rec-urgent{% endif %}">{{ rec }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+      </div>
+      {% endfor %}
+    </section>
+
+    <!-- ── ACTIONS ── -->
+    <div class="report-actions">
+      <button onclick="window.print()" class="btn-secondary">🖨 Print Report</button>
+      <a href="/form" class="btn-primary">Reassess Patient</a>
+    </div>
+
+    <!-- ── DISCLAIMER ── -->
+    <div class="disclaimer-box result-disclaimer">
+      <span class="disclaimer-icon">ℹ️</span>
+      <p>This AI-generated report is for informational purposes only and does not constitute medical advice. Always consult a qualified healthcare professional for diagnosis and treatment.</p>
+    </div>
+
+  </main>
+  {% endif %}
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Assessment — MediPredict AI</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body class="form-page">
+
+  <!-- ── NAV ─────────────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <span class="logo-icon">⬡</span>
+        <span>MediPredict<em>AI</em></span>
+      </a>
+      <div class="nav-links">
+        <span class="nav-step">Step 1 of 2 — Patient Data</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── FORM WRAPPER ──────────────────────────────────────────────── -->
+  <main class="form-main">
+    <div class="form-header">
+      <h1>Health Risk Assessment</h1>
+      <p>Fill in your current health metrics below. All fields are required for an accurate prediction.</p>
+    </div>
+
+    <div id="alert-box" class="alert-box hidden"></div>
+
+    <div class="form-container">
+
+      <!-- ── SECTION 1: Personal Details ── -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">👤</span>
+          <h2>Personal Details</h2>
+        </div>
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="e.g. Jane Smith" />
+          </div>
+
+          <div class="form-group">
+            <label for="gender">Gender</label>
+            <select id="gender">
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other / Prefer not to say</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="age">Age <span class="unit">(years)</span></label>
+            <input type="number" id="age" min="18" max="100" placeholder="e.g. 45" required />
+            <span class="range-hint">18 – 100</span>
+          </div>
+
+          <div class="form-group">
+            <label for="bmi">BMI <span class="unit">(kg/m²)</span></label>
+            <input type="number" id="bmi" min="10" max="60" step="0.1" placeholder="e.g. 26.5" required />
+            <span class="range-hint">10 – 60 · Normal: 18.5–24.9</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── SECTION 2: Vital Signs ── -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">💉</span>
+          <h2>Vital Signs &amp; Lab Results</h2>
+        </div>
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="blood_pressure">Systolic Blood Pressure <span class="unit">(mmHg)</span></label>
+            <input type="number" id="blood_pressure" min="60" max="250" placeholder="e.g. 120" required />
+            <span class="range-hint">60 – 250 · Normal: &lt;120</span>
+          </div>
+
+          <div class="form-group">
+            <label for="glucose">Fasting Glucose <span class="unit">(mg/dL)</span></label>
+            <input type="number" id="glucose" min="50" max="500" placeholder="e.g. 95" required />
+            <span class="range-hint">50 – 500 · Normal: 70–99</span>
+          </div>
+
+          <div class="form-group">
+            <label for="cholesterol">Total Cholesterol <span class="unit">(mg/dL)</span></label>
+            <input type="number" id="cholesterol" min="80" max="400" placeholder="e.g. 190" required />
+            <span class="range-hint">80 – 400 · Optimal: &lt;200</span>
+          </div>
+
+          <div class="form-group">
+            <label for="hba1c">HbA1c <span class="unit">(%)</span></label>
+            <input type="number" id="hba1c" min="4" max="15" step="0.1" placeholder="e.g. 5.4" required />
+            <span class="range-hint">4 – 15 · Normal: &lt;5.7</span>
+          </div>
+
+          <div class="form-group">
+            <label for="creatinine">Serum Creatinine <span class="unit">(mg/dL)</span></label>
+            <input type="number" id="creatinine" min="0.3" max="10" step="0.01" placeholder="e.g. 0.9" required />
+            <span class="range-hint">0.3 – 10 · Normal: 0.6–1.2</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── SECTION 3: Lifestyle ── -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <span class="section-icon">🏃</span>
+          <h2>Lifestyle &amp; History</h2>
+        </div>
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="smoking">Smoking Status</label>
+            <select id="smoking" required>
+              <option value="">Select status</option>
+              <option value="0">Non-smoker</option>
+              <option value="1">Current or ex-smoker</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="physical_activity">Exercise <span class="unit">(days/week)</span></label>
+            <input type="number" id="physical_activity" min="0" max="7" placeholder="e.g. 3" required />
+            <span class="range-hint">0 = sedentary · 7 = daily</span>
+          </div>
+
+          <div class="form-group">
+            <label for="family_history">Family History of Chronic Disease</label>
+            <select id="family_history" required>
+              <option value="">Select</option>
+              <option value="0">No known family history</option>
+              <option value="1">Yes — parent/sibling affected</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── SUBMIT ── -->
+      <div class="form-submit-area">
+        <button id="submit-btn" class="btn-primary btn-large" onclick="submitForm()">
+          <span id="btn-text">Analyse My Health Risk</span>
+          <span id="btn-spinner" class="spinner hidden"></span>
+          <svg id="btn-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <p class="submit-note">Your data is processed locally and never stored or shared.</p>
+      </div>
+
+    </div><!-- /.form-container -->
+  </main>
+
+  <!-- ── SAMPLE DATA BUTTON (demo helper) ── -->
+  <div class="demo-bar">
+    <span>🎯 Hackathon demo?</span>
+    <button onclick="fillSampleData('high')" class="btn-demo">Fill High-Risk Sample</button>
+    <button onclick="fillSampleData('low')"  class="btn-demo">Fill Low-Risk Sample</button>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
